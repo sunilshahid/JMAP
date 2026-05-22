@@ -5,9 +5,12 @@ workflows:
     scripts:
       - name: Create fake .env file to bypass build error
         script: echo "GEMINI_API_KEY=dummy_key" > .env
+      - name: Generate missing Gradle Wrapper
+        script: gradle wrapper
       - name: Make Gradle executable
         script: chmod +x gradlew
       - name: Build Debug APK
         script: ./gradlew assembleDebug
     artifacts:
       - app/build/outputs/apk/**/*.apk
+      
