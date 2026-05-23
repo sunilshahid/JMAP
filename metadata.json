@@ -1,5 +1,5 @@
 {
-  "name": "JMAP Debug",
+  "name": "JMAP",
   "description": "Native Android JMAP Webmail client featuring modern Material 3 UI and seamless real-time syncing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
