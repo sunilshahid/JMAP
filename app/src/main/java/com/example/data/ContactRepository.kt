@@ -10,6 +10,12 @@ class ContactRepository(
     private val json: Json = Json { ignoreUnknownKeys = true }
 ) {
     suspend fun getContacts(): List<Contact> {
+        if (sessionManager.isDemoMode) {
+            return listOf(
+                Contact("c1", "Sundar Pichai", email = "sundar@google.com"),
+                Contact("c2", "Security Team", email = "security@securemail.com")
+            )
+        }
         val accountId = sessionManager.accountId ?: return emptyList()
 
         val queryMethod = buildJsonArray {

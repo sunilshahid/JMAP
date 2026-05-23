@@ -9,13 +9,37 @@ import kotlinx.coroutines.flow.asStateFlow
 class SessionManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("jmap_prefs", Context.MODE_PRIVATE)
 
-    private val _isLoggedIn = MutableStateFlow(prefs.getString("token", null) != null)
+    private val _isLoggedIn = MutableStateFlow(prefs.getString("token", null) != null || prefs.getBoolean("isDemoMode", false))
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     fun saveToken(token: String) {
-        prefs.edit().putString("token", token).apply()
+        prefs.edit().putString("token", token).putBoolean("isDemoMode", false).apply()
         _isLoggedIn.value = true
     }
+
+    fun setDemoMode(isDemo: Boolean) {
+        prefs.edit().putBoolean("isDemoMode", isDemo).apply()
+        _isLoggedIn.value = isDemo
+    }
+    
+    val isDemoMode: Boolean
+        get() = prefs.getBoolean("isDemoMode", false)
+
+    var hasSeenWelcomeTour: Boolean
+        get() = prefs.getBoolean("hasSeenWelcomeTour", false)
+        set(value) = prefs.edit().putBoolean("hasSeenWelcomeTour", value).apply()
+        
+    var hasSetupSecureMail: Boolean
+        get() = prefs.getBoolean("hasSetupSecureMail", false)
+        set(value) = prefs.edit().putBoolean("hasSetupSecureMail", value).apply()
+
+    var secureMailApiKey: String?
+        get() = prefs.getString("secureMailApiKey", null)
+        set(value) = prefs.edit().putString("secureMailApiKey", value).apply()
+
+    var secureMailApiUrl: String?
+        get() = prefs.getString("secureMailApiUrl", null)
+        set(value) = prefs.edit().putString("secureMailApiUrl", value).apply()
 
     fun getToken(): String? {
         return prefs.getString("token", null)

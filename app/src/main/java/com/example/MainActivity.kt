@@ -39,6 +39,13 @@ import com.example.data.CalendarRepository
 import com.example.data.ContactRepository
 import com.example.network.NotificationHelper
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+
 class MainActivity : ComponentActivity() {
 
   private val requestPermissionLauncher = registerForActivityResult(
@@ -69,22 +76,69 @@ class MainActivity : ComponentActivity() {
 
         var dashboardViewModelKey by remember { mutableStateOf(0) }
 
+        val startDest = remember(isLoggedIn, sessionManager.hasSeenWelcomeTour, sessionManager.hasSetupSecureMail) {
+            when {
+                !sessionManager.hasSeenWelcomeTour -> "welcome_tour"
+                !isLoggedIn -> "login"
+                !sessionManager.hasSetupSecureMail && !sessionManager.isDemoMode -> "secure_mail_setup"
+                else -> "dashboard"
+            }
+        }
+
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+          val haptics = LocalHapticFeedback.current
           NavHost(
             navController = navController,
-            startDestination = if (isLoggedIn) "dashboard" else "login",
-            modifier = Modifier.padding(innerPadding)
+            startDestination = startDest,
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = { fadeIn(animationSpec = tween(500)) + slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(500)) },
+            exitTransition = { fadeOut(animationSpec = tween(500)) + slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(500)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(500)) + slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(500)) },
+            popExitTransition = { fadeOut(animationSpec = tween(500)) + slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(500)) }
           ) {
+            composable("welcome_tour") {
+                com.example.ui.welcome.WelcomeTourScreen(
+                    onTryDemo = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        sessionManager.hasSeenWelcomeTour = true
+                        sessionManager.setDemoMode(true)
+                        navController.navigate("dashboard") {
+                            popUpTo("welcome_tour") { inclusive = true }
+                        }
+                    },
+                    onLoginClick = {
+                        sessionManager.hasSeenWelcomeTour = true
+                        navController.navigate("login") {
+                            popUpTo("welcome_tour") { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable("login") {
               val loginViewModel = remember { LoginViewModel(sessionManager) }
               LoginScreen(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
-                  navController.navigate("dashboard") {
+                  navController.navigate("secure_mail_setup") {
                     popUpTo("login") { inclusive = true }
                   }
                 }
               )
+            }
+            composable("secure_mail_setup") {
+                com.example.ui.login.SecureMailSetupScreen(
+                    sessionManager = sessionManager,
+                    onSuccess = {
+                        navController.navigate("dashboard") {
+                            popUpTo("secure_mail_setup") { inclusive = true }
+                        }
+                    },
+                    onSkip = {
+                        navController.navigate("dashboard") {
+                            popUpTo("secure_mail_setup") { inclusive = true }
+                        }
+                    }
+                )
             }
             composable("dashboard") {
               val dashboardViewModel = remember(dashboardViewModelKey) { 

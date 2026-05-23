@@ -10,6 +10,26 @@ class EmailRepository(
     private val json: Json = Json { ignoreUnknownKeys = true }
 ) {
     suspend fun getEmails(mailboxId: String): List<Email> {
+        if (sessionManager.isDemoMode) {
+            return listOf(
+                Email(
+                    id = "msg1",
+                    from = EmailAddress("Sundar Pichai", "sundar@google.com"),
+                    subject = "Welcome to Secure Mail (Demo)",
+                    preview = "Glad to see you are trying out the new JMAP client! We've made secure mail our top priority.",
+                    date = "2026-05-23T10:00:00Z",
+                    read = false
+                ),
+                Email(
+                    id = "msg2",
+                    from = EmailAddress("Security Team", "security@securemail.com"),
+                    subject = "Important: New API Key Requirements",
+                    preview = "Please remember to securely generate your API Key in the integrations dashboard to use AES-GCM encryption natively.",
+                    date = "2026-05-22T14:30:00Z",
+                    read = true
+                )
+            )
+        }
         val accountId = sessionManager.accountId ?: throw IllegalStateException("Account ID missing")
         
         val queryMethod = buildJsonArray {
@@ -104,6 +124,51 @@ class EmailRepository(
     }
 
     suspend fun getEmail(emailId: String): Email? {
+        if (sessionManager.isDemoMode) {
+            val html1 = """
+                <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+                <h2>Welcome to Secure Mail (Demo)</h2>
+                <p>Hello,</p>
+                <p>Glad to see you are trying out the new JMAP client! We've made secure mail our top priority. We really believe that the privacy of our users should come first.</p>
+                <br/>
+                <p>Enjoy your newly found secure space.</p>
+                <p><strong>Sundar Pichai</strong></p>
+                </div>
+            """.trimIndent()
+            
+            val html2 = """
+                <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+                <h2>Action Required: API Key Update</h2>
+                <p>Dear Developer,</p>
+                <p>Please remember to securely generate your API Key in the integrations dashboard to use AES-GCM encryption natively.</p>
+                <div style="background: #f4f4f4; padding: 12px; border-radius: 4px; border-left: 4px solid #1E88E5;">
+                    <code>POST /api/v1/secure-message</code><br/>
+                    Headers: <code>Authorization: Bearer 'YOUR_API_KEY'</code>
+                </div>
+                <p>Stay safe!</p>
+                </div>
+            """.trimIndent()
+            
+            if (emailId == "msg1") {
+                return Email(
+                    id = "msg1",
+                    from = EmailAddress("Sundar Pichai", "sundar@google.com"),
+                    to = listOf(EmailAddress("Demo User", "demo@user.com")),
+                    subject = "Welcome to Secure Mail (Demo)",
+                    body = html1,
+                    date = "2026-05-23T10:00:00Z"
+                )
+            } else if (emailId == "msg2") {
+                return Email(
+                    id = "msg2",
+                    from = EmailAddress("Security Team", "security@securemail.com"),
+                    to = listOf(EmailAddress("Demo User", "demo@user.com")),
+                    subject = "Important: New API Key Requirements",
+                    body = html2,
+                    date = "2026-05-22T14:30:00Z"
+                )
+            }
+        }
         val accountId = sessionManager.accountId ?: return null
 
         val getMethod = buildJsonArray {

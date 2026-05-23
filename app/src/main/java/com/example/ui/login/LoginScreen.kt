@@ -14,12 +14,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit
 ) {
+    val haptics = LocalHapticFeedback.current
     val uiState by viewModel.uiState.collectAsState()
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -105,7 +108,10 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = viewModel::login,
+            onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                viewModel.login()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),

@@ -88,7 +88,7 @@ fun EmailDetailScreen(
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
-                        Divider()
+                        HorizontalDivider()
                     }
 
                     AndroidView(

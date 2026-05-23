@@ -12,6 +12,11 @@ class CalendarRepository(
     private val json: Json = Json { ignoreUnknownKeys = true }
 ) {
     suspend fun getEvents(): List<CalendarEvent> {
+        if (sessionManager.isDemoMode) {
+            return listOf(
+                CalendarEvent("e1", "Secure Mail Check-In", "2026-05-24T10:00:00Z", "cal1")
+            )
+        }
         val accountId = sessionManager.accountId ?: return emptyList()
 
         val queryMethod = buildJsonArray {

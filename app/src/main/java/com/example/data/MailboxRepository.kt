@@ -16,6 +16,15 @@ class MailboxRepository(
     private val json: Json = Json { ignoreUnknownKeys = true }
 ) {
     suspend fun getMailboxes(): List<Mailbox> {
+        if (sessionManager.isDemoMode) {
+            return listOf(
+                Mailbox("m1", "Inbox", unread = 10, role = "inbox", sortOrder = 0),
+                Mailbox("m2", "Sent", role = "sent", sortOrder = 1),
+                Mailbox("m3", "Drafts", role = "drafts", sortOrder = 2),
+                Mailbox("m4", "Archive", role = "archive", sortOrder = 3)
+            )
+        }
+        
         val accountId = sessionManager.accountId ?: throw IllegalStateException("Account ID missing")
 
         val methodCall = buildJsonArray {

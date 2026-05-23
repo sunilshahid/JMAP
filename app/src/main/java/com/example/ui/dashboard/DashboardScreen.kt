@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,7 +71,7 @@ fun DashboardScreen(
                     },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
-                Divider()
+                HorizontalDivider()
                 Text(
                     "Mailboxes",
                     style = MaterialTheme.typography.titleMedium,
@@ -97,9 +98,9 @@ fun DashboardScreen(
                         )
                     }
                 }
-                Divider()
+                HorizontalDivider()
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Logout, contentDescription = "Logout") },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout") },
                     label = { Text("Logout") },
                     selected = false,
                     onClick = {
@@ -311,7 +312,7 @@ fun getIconForRole(role: String?): androidx.compose.ui.graphics.vector.ImageVect
     return when (role?.lowercase()) {
         "inbox" -> Icons.Default.Inbox
         "drafts" -> Icons.Default.Drafts
-        "sent" -> Icons.Default.Send
+        "sent" -> Icons.AutoMirrored.Filled.Send
         "archive" -> Icons.Default.Archive
         "trash" -> Icons.Default.Delete
         "junk", "spam" -> Icons.Default.Report
