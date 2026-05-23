@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 enum class AppType {
-    MAIL, CONTACTS, CALENDAR
+    MAIL, CONTACTS, CALENDAR, SETTINGS
 }
 
 class DashboardViewModel(
@@ -29,7 +29,7 @@ class DashboardViewModel(
     private val emailRepository: EmailRepository,
     private val contactRepository: ContactRepository,
     private val calendarRepository: CalendarRepository,
-    private val sessionManager: SessionManager,
+    val sessionManager: SessionManager,
     private val webSocketManager: JmapWebSocketManager,
     private val notificationHelper: NotificationHelper
 ) : ViewModel() {

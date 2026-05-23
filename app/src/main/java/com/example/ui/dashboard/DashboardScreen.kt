@@ -100,6 +100,16 @@ fun DashboardScreen(
                 }
                 HorizontalDivider()
                 NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                    label = { Text("Settings") },
+                    selected = uiState.activeApp == AppType.SETTINGS,
+                    onClick = {
+                        viewModel.setAppType(AppType.SETTINGS)
+                        scope.launch { drawerState.close() }
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
                     icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout") },
                     label = { Text("Logout") },
                     selected = false,
@@ -123,6 +133,7 @@ fun DashboardScreen(
                             AppType.MAIL -> selectedMailbox?.name ?: "Mail"
                             AppType.CONTACTS -> "Contacts"
                             AppType.CALENDAR -> "Calendar"
+                            AppType.SETTINGS -> "Settings"
                         }
                         Text(title)
                     },
@@ -179,6 +190,9 @@ fun DashboardScreen(
                         }
                         AppType.CALENDAR -> {
                             CalendarEventList(events = uiState.events, isLoading = uiState.isEventsLoading)
+                        }
+                        AppType.SETTINGS -> {
+                            com.example.ui.settings.SettingsScreen(sessionManager = viewModel.sessionManager)
                         }
                     }
                 }

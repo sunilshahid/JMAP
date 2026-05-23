@@ -87,7 +87,53 @@ fun ComposeEmailScreen(
                 singleLine = true
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Enable Secure Mail", style = MaterialTheme.typography.bodyLarge)
+                Switch(
+                    checked = uiState.isSecureMail,
+                    onCheckedChange = { viewModel.onSecureMailToggle(it) }
+                )
+            }
+
+            if (uiState.isSecureMail) {
+                Spacer(modifier = Modifier.height(8.dp))
+                var expanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = uiState.expiration,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Expiration time") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        listOf("1hour", "1week", "burn").forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    viewModel.onExpirationChange(option)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             
             OutlinedTextField(
                 value = uiState.body,

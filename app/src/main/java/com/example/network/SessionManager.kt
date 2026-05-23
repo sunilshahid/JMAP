@@ -33,6 +33,22 @@ class SessionManager(context: Context) {
         get() = prefs.getBoolean("hasSetupSecureMail", false)
         set(value) = prefs.edit().putBoolean("hasSetupSecureMail", value).apply()
 
+    var hasSelectedLanguage: Boolean
+        get() = prefs.getBoolean("hasSelectedLanguage", false)
+        set(value) = prefs.edit().putBoolean("hasSelectedLanguage", value).apply()
+
+    var languageCode: String
+        get() = prefs.getString("languageCode", "en") ?: "en"
+        set(value) = prefs.edit().putString("languageCode", value).apply()
+
+    private val _themeMode = MutableStateFlow(prefs.getInt("themeMode", 0)) // 0: System, 1: Light, 2: Dark
+    val themeMode: StateFlow<Int> = _themeMode.asStateFlow()
+
+    fun setThemeMode(mode: Int) {
+        prefs.edit().putInt("themeMode", mode).apply()
+        _themeMode.value = mode
+    }
+
     var secureMailApiKey: String?
         get() = prefs.getString("secureMailApiKey", null)
         set(value) = prefs.edit().putString("secureMailApiKey", value).apply()

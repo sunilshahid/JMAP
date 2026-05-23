@@ -61,9 +61,16 @@ class MainActivity : ComponentActivity() {
     }
 
     setContent {
-      JmapClientTheme {
-        val navController = rememberNavController()
         val sessionManager = remember { SessionManager(this) }
+        val themeMode by sessionManager.themeMode.collectAsState()
+        val darkTheme = when (themeMode) {
+            1 -> false
+            2 -> true
+            else -> androidx.compose.foundation.isSystemInDarkTheme()
+        }
+
+      JmapClientTheme(darkTheme = darkTheme) {
+        val navController = rememberNavController()
         val isLoggedIn by sessionManager.isLoggedIn.collectAsState()
         
         val jmapClient = remember { JmapClient(sessionManager) }
@@ -76,8 +83,9 @@ class MainActivity : ComponentActivity() {
 
         var dashboardViewModelKey by remember { mutableStateOf(0) }
 
-        val startDest = remember(isLoggedIn, sessionManager.hasSeenWelcomeTour, sessionManager.hasSetupSecureMail) {
+        val startDest = remember(isLoggedIn, sessionManager.hasSeenWelcomeTour, sessionManager.hasSetupSecureMail, sessionManager.hasSelectedLanguage) {
             when {
+                !sessionManager.hasSelectedLanguage -> "language_selection"
                 !sessionManager.hasSeenWelcomeTour -> "welcome_tour"
                 !isLoggedIn -> "login"
                 !sessionManager.hasSetupSecureMail && !sessionManager.isDemoMode -> "secure_mail_setup"
@@ -96,6 +104,16 @@ class MainActivity : ComponentActivity() {
             popEnterTransition = { fadeIn(animationSpec = tween(500)) + slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(500)) },
             popExitTransition = { fadeOut(animationSpec = tween(500)) + slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(500)) }
           ) {
+            composable("language_selection") {
+                com.example.ui.welcome.LanguageSelectionScreen(
+                    sessionManager = sessionManager,
+                    onLanguageSelected = {
+                        navController.navigate("welcome_tour") {
+                            popUpTo("language_selection") { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable("welcome_tour") {
                 com.example.ui.welcome.WelcomeTourScreen(
                     onTryDemo = {
@@ -171,7 +189,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable("compose") {
-                val composeViewModel = remember { ComposeViewModel(emailRepository, mailboxRepository) }
+                val composeViewModel = remember { ComposeViewModel(emailRepository, mailboxRepository, sessionManager) }
                 ComposeEmailScreen(
                     viewModel = composeViewModel,
                     onClose = { navController.popBackStack() }
